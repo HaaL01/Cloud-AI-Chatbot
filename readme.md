@@ -76,6 +76,26 @@ NEXT_PUBLIC_API_URL=http://[Your-ECS-IP]:11434
 
 Setup .env.local file to include your necessary endpoints for connection within any cloud infrastructure.
 
+## Environment Setup
+
+1. Create a `.env.local` file in the root directory with the following variables: 
+A sample .env file is show below.
+
+```bash
+# PostgreSQL Connection
+POSTGRES_HOST=your-database-endpoint.region.rds.amazonaws.com
+POSTGRES_PORT=5432
+POSTGRES_DB=your_database_name
+POSTGRES_USER=your_database_username
+POSTGRES_PASSWORD=your_database_password
+
+# JWT Secret (generate a strong random string i.e. openssl rand -hex 64)
+JWT_SECRET=your_jwt_secret_key_here
+
+# Ollama API Configuration
+NEXT_PUBLIC_API_URL=http://your-ollama-server:11434
+```
+
 The application uses the following Ollama endpoints:
 
 1. Model Check:
@@ -97,21 +117,30 @@ curl -X POST http://[ECS-IP]:11434/api/generate -d '{
 ```
 src/
 ├── app/
-│   ├── layout.tsx                 # Root layout
-│   ├── page.tsx                  # Home page
-│   ├── globals.css               # Global styles
-│   ├── chat/
-│   │   └── page.tsx             # Chat interface page
+│   ├── layout.tsx               # Root layout
+│   ├── auth/
+│   │   ├── page.tsx            # Main chat interface
+│   │   └── redirect/
+│   │       └── page.tsx        # Auth redirect handler
+│   ├── globals.css             # Global styles
+│   ├── components/
+│   │   └── SidePanel.tsx       # Side panel component
 │   └── api/
-│       └── chat/
-│           └── route.ts         # API routes
-├── components/
-│   └── chat/
-│       └── chat-interface.tsx   # Main chat component
-├── lib/
-│   └── api.ts                   # API utilities
-└── types/
-    └── chat.ts                  # TypeScript interfaces
+│       ├── auth/
+│       │   ├── check/
+│       │   │   └── route.ts    # Auth check endpoint
+│       │   ├── login/
+│       │   │   └── route.ts    # Login endpoint
+│       │   ├── logout/
+│       │   │   └── route.ts    # Logout endpoint
+│       │   └── signup/
+│       │       └── route.ts    # Signup endpoint
+│       ├── chat/
+│       │   └── route.ts        # Chat API endpoint
+│       └── chats/
+│           └── route.ts        # Chats management endpoint
+└── utils/
+    └── db.ts      # Database Connection
 ```
 
 ## Security Considerations
