@@ -1,6 +1,7 @@
 # AI Chatbot with Next.js and Ollama
 
 A modern chatbot interface built with Next.js, React, and integrated with Ollama's phi3:mini model. Features a clean, responsive UI similar to ChatGPT and Claude.
+This website is meant to set-up and runned on AWS or any cloud service provider.
 
 ## Features
 
@@ -72,6 +73,8 @@ NEXT_PUBLIC_API_URL=http://[Your-ECS-IP]:11434
 - Ensure inbound traffic rules are properly configured
 
 ## API Endpoints
+
+Setup .env.local file to include your necessary endpoints for connection within any cloud infrastructure.
 
 The application uses the following Ollama endpoints:
 
