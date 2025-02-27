@@ -17,8 +17,10 @@ This website is meant to set-up and runned on AWS or any cloud service provider.
 
 - Frontend: Next.js 15.1.6 with TypeScript
 - UI: React 19.0.0 with Tailwind CSS
-- Icons: Lucide React
 - Backend API Integration: Ollama Service (ECS with Fargate)
+
+## Website Sample
+![Sample Website UI](sampleimg/Chatbot-example.png)
 
 ## Prerequisites
 

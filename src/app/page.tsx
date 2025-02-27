@@ -18,6 +18,8 @@ type Chat = {
   title: string;
   timestamp: Date;
   messages: Message[];
+  isSaved?: boolean; // Add this property
+  dbId?: string; // Database ID if saved
 };
 
 type User = {
@@ -77,14 +79,16 @@ export default function HomePage() {
       const response = await fetch(`/api/chats?userId=${userId}`);
       if (response.ok) {
         const userChats = await response.json();
-        // Transform the timestamps to Date objects
+        // Transform the timestamps to Date objects and mark as saved
         const transformedChats = userChats.map((chat: Chat) => ({
           ...chat,
           timestamp: new Date(chat.timestamp),
           messages: chat.messages.map(message => ({
             ...message,
             timestamp: new Date(message.timestamp)
-          }))
+          })),
+          isSaved: true,
+          dbId: chat.id
         }));
         setChats(transformedChats);
         
@@ -190,8 +194,8 @@ export default function HomePage() {
   }, [queue, loading]);
 
   const handleNewChat = async () => {
-    // Save current chat if it exists and has messages
-    if (currentChat && currentChat.messages.length > 0 && user) {
+    // Only save if it's a new chat (not already saved) and has messages
+    if (currentChat && currentChat.messages.length > 0 && !currentChat.isSaved && user) {
       try {
         const response = await fetch('/api/chats', {
           method: 'POST',
@@ -221,14 +225,19 @@ export default function HomePage() {
       id: Math.random().toString(36).substr(2, 9),
       title: 'New Chat',
       timestamp: new Date(),
-      messages: []
+      messages: [],
+      isSaved: false
     };
 
     setCurrentChat(newChat);
     setCurrentResponse('');
   };
 
-  const handleChatSelect = (chatId: string) => {
+  const handleChatSelect = async (chatId: string) => {
+    // First save the current chat if needed
+    await saveCurrentChatIfNeeded();
+    
+    // Then switch to the selected chat
     const selected = chats.find(chat => chat.id === chatId);
     if (selected) {
       setCurrentChat(selected);
@@ -277,6 +286,52 @@ export default function HomePage() {
     setPrompt('');
   };
 
+  // Add this function to handle the seamless transition
+  const startNewChat = async () => {
+    // Auto-save the current chat if needed
+    await saveCurrentChatIfNeeded();
+    
+    // Create new chat
+    const newChat: Chat = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: 'New Chat',
+      timestamp: new Date(),
+      messages: [],
+      isSaved: false
+    };
+
+    setCurrentChat(newChat);
+    setCurrentResponse('');
+  };
+
+  // Helper function to save the current chat if needed
+  const saveCurrentChatIfNeeded = async () => {
+    if (currentChat && currentChat.messages.length > 0 && !currentChat.isSaved && user) {
+      try {
+        const response = await fetch('/api/chats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: currentChat.title,
+            userId: user.id,
+            messages: currentChat.messages
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save chat');
+        }
+
+        // Refresh chat list after saving
+        await fetchUserChats(user.id);
+      } catch (error) {
+        console.error('Failed to save chat:', error);
+      }
+    }
+  };
+
   return (
     <div className="flex min-h-screen">
       <SidePanel
@@ -294,10 +349,10 @@ export default function HomePage() {
             <h1 className="text-2xl font-bold">Chat Interface</h1>
             {isLoggedIn && (
               <button
-                onClick={handleNewChat}
+                onClick={startNewChat}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
               >
-                Start New Chat
+                <span>Start New Chat</span>
               </button>
             )}
           </div>
