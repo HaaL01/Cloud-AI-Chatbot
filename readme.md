@@ -156,6 +156,10 @@ src/
    - Never commit `.env` files
    - Use proper environment variable handling
    - Follow security best practices for API keys
+  
+3. Security
+   - This product was built as a demo. Security flaws are apparent!
+   - Communications originally served over HTTP.
 
 ## Troubleshooting
 
